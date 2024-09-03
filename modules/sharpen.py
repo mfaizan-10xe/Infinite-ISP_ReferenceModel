@@ -30,7 +30,6 @@ class Sharpening:
         """
         Generate a Gaussian kernel for convolutions for Sharpening Algorithm
         """
-
         if size_y is None:
             size_y = size_x
         if sigma_y is None:
@@ -42,14 +41,14 @@ class Sharpening:
         x_0 = size_x // 2
         y_0 = size_y // 2
 
-        x_axis = np.arange(0, size_x, dtype=float)  # x_axis range [0:size_x]
+        x_axis = np.arange(0, size_x, dtype=float)
         y_axis = np.arange(0, size_y, dtype=float)[:, np.newaxis]
 
         x_axis -= x_0
         y_axis -= y_0
 
-        exp_part = (x_axis**2 / (2 * sigma_x**2)) + (y_axis**2 / (2 * sigma_y**2))
-        return 1 / ((2 * np.pi * sigma_x * sigma_y) * np.exp(-exp_part))
+        exp_part = x_axis**2 / (2 * sigma_x**2) + y_axis**2 / (2 * sigma_y**2)
+        return 1 / (2 * np.pi * sigma_x * sigma_y) * np.exp(-exp_part)
 
     def apply_sharpen(self):
         """Sharpens an image using the unsharp mask algorithm.
@@ -71,8 +70,8 @@ class Sharpening:
         kernel = (kernel * (2**20)).astype(np.int32)
 
         folder_name = "coefficients/SHARP"
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
+        if not os.path.exists(folder_name):   # Write kernel weight to a text file for RTL simulation
+                os.makedirs(folder_name)
         create_coeff_file(kernel, "coefficients/SHARP/luma_kernel", 20)
 
         luma = (self.img[:, :, 0]).astype(np.int32)
@@ -84,7 +83,7 @@ class Sharpening:
         smoothened = correlation >> 20
 
         # Sharpen the image with upsharp mask
-        # Strength is tuneable with the sharpen_strength parameter]
+        # Strength is tuneable with the sharpen_strength parameter
         sh_str = self.parm_sha["sharpen_strength"]
         print("   - Sharpen  - strength = ", sh_str)
         strength = int(sh_str * (2**10))
